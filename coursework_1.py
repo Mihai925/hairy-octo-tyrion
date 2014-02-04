@@ -35,7 +35,7 @@ BrickPi.Encoder[motor2] = 0
 BrickPiSetupSensors()   
 
 #Radius of our wheel (subject to calibration)
-WHEEL_AXEL = 2.2
+WHEEL_AXLE = 2.2
 
 #Default speeds (subject to calibration)
 DEFAULT_MOTOR_A_SPEED = 200
@@ -44,13 +44,13 @@ DEFAULT_TARGET_SPEED = 202
 
 #Moving Forward
 def forward(distance):
-  global WHEEL_AXEL, motorASpeed, motorBSpeed
+  global WHEEL_AXLE, motorASpeed, motorBSpeed
   BrickPiUpdateValues()
   encoder_1 = BrickPi.Encoder[motor1]
   encoder_2 = BrickPi.Encoder[motor2]
   motorASpeed = DEFAULT_MOTOR_A_SPEED
   motorBSpeed = DEFAULT_MOTOR_B_SPEED
-  circumference = 2 * math.pi * WHEEL_AXEL
+  circumference = 2 * math.pi * WHEEL_AXLE
   print "Going forwards"
   no_rotations = distance / circumference
   degrees  = no_rotations * 720
@@ -82,13 +82,13 @@ def calibrate(degrees, encoder_1, encoder_2):
 
 #Move backward
 def move_backwards(distance):
-  global WHEEL_AXEL, motorASpeed, motorBSpeed
+  global WHEEL_AXLE, motorASpeed, motorBSpeed
   BrickPiUpdateValues()
   encoder_1 = BrickPi.Encoder[motor1]
   encoder_2 = BrickPi.Encoder[motor2]
   motorASpeed = -DEFAULT_MOTOR_A_SPEED
   motorBSpeed = -DEFAULT_MOTOR_B_SPEED
-  circumference = 2 * math.pi * WHEEL_AXEL
+  circumference = 2 * math.pi * WHEEL_AXLE
   print "Going backwards"
   no_rotations = distance / circumference
   degrees  = no_rotations * 720
@@ -127,25 +127,16 @@ def wait():
   time.sleep(0.5)
 
 #Turn -- private function
-def turn(deg, orientation):
-  global WHEEL_AXEL, motorASpeed, motorBSpeed
-  
-  #Adjust initial speeds
-  if (orientation == "l"):
-    print "Rotating Left"
-    motorASpeed = -DEFAULT_MOTOR_A_SPEED
-    motorBSpeed = DEFAULT_MOTOR_B_SPEED 
-  elif (orientation == "r"):
-    print "Rotating Right"
-    motorASpeed = DEFAULT_MOTOR_A_SPEED
-    motorBSpeed = -DEFAULT_MOTOR_B_SPEED
-  else:
-    raise Exception("Orientation needs to be defined")
+def turn(deg):
+  global WHEEL_AXLE, motorASpeed, motorBSpeed
 
+  print "Rotating Left"
+  motorASpeed = -DEFAULT_MOTOR_A_SPEED
+  motorBSpeed = DEFAULT_MOTOR_B_SPEED 
   #Establish number of spins
   axle = 6.0
   distance = axle * 2 * math.pi * deg / 360 
-  circumference = 2 * math.pi * WHEEL_AXEL
+  circumference = 2 * math.pi * WHEEL_AXLE
   no_rotations = distance / circumference
   degrees  = no_rotations * 720 
   
@@ -168,9 +159,8 @@ def main():
   for i in range(4):
       forward(float(size))
       wait()
-      turn(90, "l")
+      turn(90)
       wait()
   print "Square ended"
-
 
 main()
