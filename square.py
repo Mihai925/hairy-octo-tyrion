@@ -129,7 +129,7 @@ def turn(deg, orientation):
     raise Exception("undefined orientation")
 
   #Establish number of spins
-  axle = 6.0
+  axle = 5.7
   distance = axle * 2 * math.pi * deg / 360 
   circumference = 2 * math.pi * WHEELRADIUS
   no_rotations = distance / circumference
@@ -149,10 +149,10 @@ def turn(deg, orientation):
     time.sleep(.001)
 
 def main():
-  size = 30
+  length = 40
   print "Starting Robot"
   for i in range(4):
-      forward(float(size))
+      forward(float(length))
       wait()
       turn(90, "l")
       wait()
