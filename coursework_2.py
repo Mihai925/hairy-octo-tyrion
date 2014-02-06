@@ -16,7 +16,7 @@ from BrickPi import *
 import random
 import datetime
 import math, sys
-
+from collections import Counter
 
 #Setting up BrickPi
 BrickPiSetup()  
@@ -34,11 +34,12 @@ BrickPi.MotorEnable[motor2] = 1
 BrickPi.Encoder[motor1] = 0
 BrickPi.Encoder[motor2] = 0
 
+DISTANCE = PORT_3
 BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
 #BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
 #BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
 BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
-
+BrickPi.SensorType[DISTANCE] = TYPE_SENSOR_ULTRASONIC_CONT
 
 
 BrickPiSetupSensors()   
@@ -192,6 +193,24 @@ def run():
         bump(3)
     time.sleep(0.001)
 
+def run_corner():
+  values = []
+  i=0
+  val = 0
+  while True:
+    #forward(5)    
+    result = BrickPiUpdateValues()
+    if not result:
+      distance = BrickPi.Sensor[DISTANCE]
+      values.insert(i,distance)
+      i = (i+1) % 10
+      readings = Counter(values)
+      mode = readings.most_common(1)[0][0]
+      if mode!=val:
+         print "mode changed from ", val, " to ", mode
+      val = mode
+    time.sleep(0.001)
+
 def bump(hit_val):
    print "bump(", hit_val, ")"
    print "in back"
@@ -219,5 +238,6 @@ def main():
 #  BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
 #  BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
   #move_backwards(10)
-  run()
+  #run()
+  run_corner()
 main()
