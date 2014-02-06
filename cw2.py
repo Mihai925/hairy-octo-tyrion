@@ -13,6 +13,8 @@
 
 #Importing the BrickPi library 
 from BrickPi import *  
+import random
+import datetime
 import math, sys
 
 
@@ -32,6 +34,13 @@ BrickPi.MotorEnable[motor2] = 1
 BrickPi.Encoder[motor1] = 0
 BrickPi.Encoder[motor2] = 0
 
+BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
+#BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
+#BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
+BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
+
+
+
 BrickPiSetupSensors()   
 
 #Radius of our wheel (subject to calibration)
@@ -41,6 +50,8 @@ WHEEL_AXLE = 2.2
 DEFAULT_MOTOR_A_SPEED = 200
 DEFAULT_MOTOR_B_SPEED = 204
 DEFAULT_TARGET_SPEED = 202
+
+ 
 
 #Moving Forward
 def forward(distance):
@@ -127,14 +138,20 @@ def wait():
   time.sleep(0.5)
 
 #Turn -- private function
-def turn(deg):
+def turn(deg, orientation):
   global WHEEL_AXLE, motorASpeed, motorBSpeed
 
   print "Rotating Left"
-  motorASpeed = -DEFAULT_MOTOR_A_SPEED
-  motorBSpeed = DEFAULT_MOTOR_B_SPEED 
+  if orientation == 'r':
+    motorASpeed = -DEFAULT_MOTOR_A_SPEED
+    motorBSpeed = DEFAULT_MOTOR_B_SPEED
+  elif orientation == 'l':
+    motorASpeed = DEFAULT_MOTOR_A_SPEED
+    motorBSpeed = -DEFAULT_MOTOR_A_SPEED
+  else:
+    return 
   #Establish number of spins
-  axle = 5.3
+  axle = 6.0
   distance = axle * 2 * math.pi * deg / 360 
   circumference = 2 * math.pi * WHEEL_AXLE
   no_rotations = distance / circumference
@@ -145,22 +162,60 @@ def turn(deg):
   encoder_2 = BrickPi.Encoder[motor2]
 
   #Start turning 
+  
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
- 
   while(abs(BrickPi.Encoder[motor1] - encoder_1) < degrees
     and abs(BrickPi.Encoder[motor2] - encoder_2) < degrees): 
     BrickPiUpdateValues()
     time.sleep(.001)
 
-def main():
-  size = 40
-  print "Begining square program"
-  for i in range(4):
-      forward(float(size))
-      wait()
-      turn(90)
-      wait()
-  print "Square ended"
+def nonpseudorandom():
+  random_seed = datetime.datetime.now().time().microsecond
+  random.seed(random_seed)
+  if random.random() <= 0.5:
+    return True
+  return False  
 
+def run():
+  while True:
+    forward(10)
+    result = BrickPiUpdateValues()
+    if not result:
+      left = BrickPi.Sensor[PORT_4]
+      right = BrickPi.Sensor[PORT_1]
+      if left==1 and right==1:
+        bump(1)
+      elif left==1:
+        bump(2)
+      elif right==1:
+        bump(3)
+    time.sleep(0.1)
+
+def bump(hit_val):
+   print "bump(", hit_val, ")"
+   print "in back"
+   print "hit val=", hit_val
+   #move_backwards(5)
+   print "going in if"
+   if hit_val==1:
+     print "val being 1"
+     if nonpseudorandom():
+       turn(90, "r")
+     else:
+       turn(90, "l")
+   elif hit_val==2:
+     print "Val being 2"
+     turn(90,"r")
+   elif hit_val==3:
+     print "val being 3"
+     turn(90,"l") 
+
+def main():
+  print "Begining sensor testing"
+#  BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
+#  BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
+#  BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
+#  BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
+  move_backwards(5)
 main()

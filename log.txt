@@ -1,0 +1,116 @@
+Begining sensor testing
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 3 )
+in back
+hit val= 3
+Sleep...zzzz
+Going backwards
+going in if
+val being 3
+Rotating Left
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 2 )
+in back
+hit val= 2
+Sleep...zzzz
+Going backwards
+going in if
+Val being 2
+Rotating Left
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+Going forwards
+bump( 3 )
+in back
+hit val= 3
+Sleep...zzzz
+Going backwards
+going in if
+val being 3
+Rotating Left
+Going forwards
+bump( 3 )
+in back
+hit val= 3
+Sleep...zzzz
+Going backwards
+going in if
+val being 3
+Rotating Left
