@@ -190,7 +190,7 @@ def run():
         bump(2)
       elif right==1:
         bump(3)
-    time.sleep(0.1)
+    time.sleep(0.001)
 
 def bump(hit_val):
    print "bump(", hit_val, ")"
