@@ -194,7 +194,7 @@ def run():
     time.sleep(0.001)
 
 def run_corner():
-  values = []
+  values = [0]
   i=0
   val = 0
   while True:
@@ -202,14 +202,15 @@ def run_corner():
     result = BrickPiUpdateValues()
     if not result:
       distance = BrickPi.Sensor[DISTANCE]
-      values.insert(i,distance)
-      i = (i+1) % 10
+      values.append(distance)
+      if len(values)==11:
+        values.pop(0)
       readings = Counter(values)
       mode = readings.most_common(1)[0][0]
       if mode!=val:
          print "mode changed from ", val, " to ", mode
       val = mode
-    time.sleep(0.001)
+    time.sleep(0.01)
 
 def bump(hit_val):
    print "bump(", hit_val, ")"
