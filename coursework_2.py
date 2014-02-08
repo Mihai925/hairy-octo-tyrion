@@ -1,4 +1,4 @@
-#!/usr/bin/python
+ #!/usr/bin/python
 # Jaikrishna
 # Initial Date: June 24, 2013
 # Last Updated: June 24, 2013
@@ -13,6 +13,7 @@
 
 #Importing the BrickPi library 
 from BrickPi import *  
+#from numpy import mean
 import random
 import datetime
 import math, sys
@@ -51,7 +52,8 @@ WHEEL_AXLE = 2.2
 DEFAULT_MOTOR_A_SPEED = 200
 DEFAULT_MOTOR_B_SPEED = 204
 DEFAULT_TARGET_SPEED = 202
-
+DEFAULT_DISTANCE = 30
+CURRENT_DISTANCE = 30
  
 
 #Moving Forward
@@ -71,7 +73,7 @@ def forward(distance):
   while(BrickPi.Encoder[motor1] - encoder_1 < degrees
     and BrickPi.Encoder[motor2] - encoder_2 < degrees): 
     BrickPiUpdateValues()            	
-    calibrate(degrees, encoder_1, encoder_2)
+    calibrateForward(degrees, encoder_1, encoder_2)
     time.sleep(.001)                   	
     
 def calibrate(degrees, encoder_1, encoder_2):
@@ -80,13 +82,12 @@ def calibrate(degrees, encoder_1, encoder_2):
   rotationsB = BrickPi.Encoder[motor2] - encoder_2
   target_speed = DEFAULT_TARGET_SPEED
   #Coeficient (found by calibrating)
-  k = 1 
-  if rotationsA < rotationsB:
-    diff = rotationsB - rotationsA
+  k = 1
+  diff = DEFAULT_DISTANCE - CURRENT_DISTANCE
+  if DEFAULT_DISTANCE > CURRENT_DISTANCE:
     motorASpeed = target_speed + diff * k
     motorBSpeed = target_speed - diff * k
-  elif rotationsA > rotationsB: 
-    diff = rotationsA - rotationsB
+  elif DEFAULT_DISTANCE < CURRENT_DISTANCE: 
     motorASpeed = target_speed - diff * k
     motorBSpeed = target_speed + diff * k
   BrickPi.MotorSpeed[motor1] = motorASpeed
@@ -111,6 +112,25 @@ def move_backwards(distance):
     BrickPiUpdateValues()            	
     calibrateBack(degrees, encoder_1, encoder_2) 
     time.sleep(.001)                   	
+
+def calibrateForward(degrees, encoder_1, encoder_2):
+  global motorASpeed, motorBSpeed
+  rotationsA = BrickPi.Encoder[motor1] - encoder_1
+  rotationsB = BrickPi.Encoder[motor2] - encoder_2
+  target_speed = DEFAULT_TARGET_SPEED
+  #Coeficient (found by calibrating)
+  k = 1
+  if rotationsA < rotationsB:
+    diff = rotationsB - rotationsA
+    motorASpeed = target_speed + diff * k
+    motorBSpeed = target_speed - diff * k
+  elif rotationsA > rotationsB:
+    diff = rotationsA - rotationsB
+    motorASpeed = target_speed - diff * k
+    motorBSpeed = target_speed + diff * k
+  BrickPi.MotorSpeed[motor1] = motorASpeed
+  BrickPi.MotorSpeed[motor2] = motorBSpeed
+
     
 def calibrateBack(degrees, encoder_1, encoder_2):
   global motorASpeed, motorBSpeed
@@ -129,6 +149,8 @@ def calibrateBack(degrees, encoder_1, encoder_2):
     motorBSpeed = target_speed + diff * k
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
+
+
 
 #Waiting
 def wait(duration):
@@ -193,12 +215,56 @@ def run():
         bump(3)
     time.sleep(0.001)
 
+def get_distance():
+  global CURRENT_DISTANCE
+  values = []
+  result = BrickPiUpdateValues()
+  #for i in range(100):
+  #  BrickPiUpdateValues()
+  for i in range(100):
+    result = BrickPiUpdateValues()
+    if not result:
+      distance = BrickPi.Sensor[DISTANCE]
+      values.append(distance)
+  #values.sort()
+  #for i in range(9):
+  #  if values[i+1] - values[i] >= 128:
+  #    values[i+1] -= 128
+  print values
+  readings = Counter(values)
+  mode = readings.most_common(1)[0][0]
+  
+  return mode#values[len(values)/2]
+
+def max(a, b):
+  if a > b:
+    return a
+  return b
+
+def require_distance():
+  global motorASpeed, motorBSpeed
+  BrickPiUpdateValues()
+  actual_distance = get_distance()
+  print "distance", actual_distance
+  k = 10
+  while actual_distance > DEFAULT_DISTANCE:
+    print "distance",  actual_distance
+    delta = max(0, actual_distance - DEFAULT_DISTANCE)
+    print delta
+    motorASpeed = k * delta
+    motorBSpeed = k * delta
+    forward(1)
+    actual_distance = get_distance()
+    time.sleep(0.01)
+  wait(1)
+
 def run_corner():
+  global CURRENT_DISTANCE
   values = [0]
   i=0
   val = 0
   while True:
-    #forward(5)    
+    forward(5)    
     result = BrickPiUpdateValues()
     if not result:
       distance = BrickPi.Sensor[DISTANCE]
@@ -208,6 +274,7 @@ def run_corner():
       readings = Counter(values)
       mode = readings.most_common(1)[0][0]
       if mode!=val:
+         CURRENT_DISTANCE = mode
          print "mode changed from ", val, " to ", mode
       val = mode
     time.sleep(0.01)
@@ -234,11 +301,12 @@ def bump(hit_val):
 
 def main():
   print "Begining sensor testing"
-#  BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
-#  BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
-#  BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
-#  BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
+  #BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
+  #BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
+  #BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
+  #BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
   #move_backwards(10)
   #run()
-  run_corner()
+  require_distance()
+  #run_corner()
 main()
