@@ -49,11 +49,11 @@ BrickPiSetupSensors()
 WHEEL_AXLE = 2.2
 
 #Default speeds (subject to calibration)
-DEFAULT_MOTOR_A_SPEED = 200
-DEFAULT_MOTOR_B_SPEED = 204
+DEFAULT_MOTOR_A_SPEED = 250
+DEFAULT_MOTOR_B_SPEED = 250
 DEFAULT_TARGET_SPEED = 202
-DEFAULT_DISTANCE = 30
-CURRENT_DISTANCE = 30
+DEFAULT_DISTANCE = 45
+CURRENT_DISTANCE = 45
  
 
 #Moving Forward
@@ -62,8 +62,8 @@ def forward(distance):
   BrickPiUpdateValues()
   encoder_1 = BrickPi.Encoder[motor1]
   encoder_2 = BrickPi.Encoder[motor2]
-  motorASpeed = DEFAULT_MOTOR_A_SPEED
-  motorBSpeed = DEFAULT_MOTOR_B_SPEED
+  #motorASpeed = DEFAULT_MOTOR_A_SPEED
+  #motorBSpeed = DEFAULT_MOTOR_B_SPEED
   circumference = 2 * math.pi * WHEEL_AXLE
   print "Going forwards"
   no_rotations = distance / circumference
@@ -73,25 +73,45 @@ def forward(distance):
   while(BrickPi.Encoder[motor1] - encoder_1 < degrees
     and BrickPi.Encoder[motor2] - encoder_2 < degrees): 
     BrickPiUpdateValues()            	
-    calibrateForward(degrees, encoder_1, encoder_2)
+    calibrate(degrees, encoder_1, encoder_2)
     time.sleep(.001)                   	
     
+
 def calibrate(degrees, encoder_1, encoder_2):
   global motorASpeed, motorBSpeed
   rotationsA = BrickPi.Encoder[motor1] - encoder_1
   rotationsB = BrickPi.Encoder[motor2] - encoder_2
-  target_speed = DEFAULT_TARGET_SPEED
+  target_speed = motorASpeed#DEFAULT_TARGET_SPEED
   #Coeficient (found by calibrating)
   k = 1
-  diff = DEFAULT_DISTANCE - CURRENT_DISTANCE
-  if DEFAULT_DISTANCE > CURRENT_DISTANCE:
+  if rotationsA < rotationsB:
+    diff = rotationsB - rotationsA
     motorASpeed = target_speed + diff * k
     motorBSpeed = target_speed - diff * k
-  elif DEFAULT_DISTANCE < CURRENT_DISTANCE: 
+  elif rotationsA > rotationsB:
+    diff = rotationsA - rotationsB
     motorASpeed = target_speed - diff * k
     motorBSpeed = target_speed + diff * k
+  print 'calibrating:', motorASpeed, motorBSpeed
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
+
+#def calibrate(degrees, encoder_1, encoder_2):
+#  global motorASpeed, motorBSpeed
+#  rotationsA = BrickPi.Encoder[motor1] - encoder_1
+#  rotationsB = BrickPi.Encoder[motor2] - encoder_2
+#  target_speed = DEFAULT_TARGET_SPEED
+#  #Coeficient (found by calibrating)
+#  k = 1
+#  diff = DEFAULT_DISTANCE - CURRENT_DISTANCE
+#  if DEFAULT_DISTANCE > CURRENT_DISTANCE:
+#    motorASpeed = target_speed + diff * k
+#    motorBSpeed = target_speed - diff * k
+#  elif DEFAULT_DISTANCE < CURRENT_DISTANCE: 
+#    motorASpeed = target_speed - diff * k
+#    motorBSpeed = target_speed + diff * k
+#  BrickPi.MotorSpeed[motor1] = motorASpeed
+#  BrickPi.MotorSpeed[motor2] = motorBSpeed
 
 #Move backward
 def move_backwards(distance):
@@ -221,7 +241,7 @@ def get_distance():
   result = BrickPiUpdateValues()
   #for i in range(100):
   #  BrickPiUpdateValues()
-  for i in range(100):
+  for i in range(10):
     result = BrickPiUpdateValues()
     if not result:
       distance = BrickPi.Sensor[DISTANCE]
@@ -230,6 +250,7 @@ def get_distance():
   #for i in range(9):
   #  if values[i+1] - values[i] >= 128:
   #    values[i+1] -= 128
+  values.sort()
   print values
   readings = Counter(values)
   mode = readings.most_common(1)[0][0]
@@ -246,13 +267,18 @@ def require_distance():
   BrickPiUpdateValues()
   actual_distance = get_distance()
   print "distance", actual_distance
-  k = 10
+  
   while actual_distance > DEFAULT_DISTANCE:
     print "distance",  actual_distance
     delta = max(0, actual_distance - DEFAULT_DISTANCE)
     print delta
-    motorASpeed = k * delta
-    motorBSpeed = k * delta
+    k = delta / 25
+    motorASpeed = k * 250
+    motorBSpeed = k * 250
+    #motorASpeed = 0
+    #motorBSpeed = 0
+    print 'motorASpeed:', motorASpeed
+    print 'motorBSpeed:', motorBSpeed
     forward(1)
     actual_distance = get_distance()
     time.sleep(0.01)
