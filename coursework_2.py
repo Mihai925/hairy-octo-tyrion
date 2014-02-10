@@ -54,7 +54,7 @@ DEFAULT_MOTOR_B_SPEED = 250
 DEFAULT_TARGET_SPEED = 202
 DEFAULT_DISTANCE = 45
 CURRENT_DISTANCE = 45
-DEFAULT_CORNER_SPEED = 160 
+DEFAULT_CORNER_SPEED = 65 
 
 #Moving Forward
 def forward(distance):
@@ -76,13 +76,13 @@ def forward(distance):
     calibrate(degrees, encoder_1, encoder_2)
     time.sleep(.001)                   	
     
-def forwardCorner(distance):
+def forwardCorner(distance, factor):
   global WHEEL_AXLE, motorASpeed, motorBSpeed
   BrickPiUpdateValues()
   encoder_1 = BrickPi.Encoder[motor1]
   encoder_2 = BrickPi.Encoder[motor2]
-  #motorASpeed = DEFAULT_MOTOR_A_SPEED
-  #motorBSpeed = DEFAULT_MOTOR_B_SPEED
+  motorASpeed = DEFAULT_CORNER_SPEED
+  motorBSpeed = DEFAULT_CORNER_SPEED
   circumference = 2 * math.pi * WHEEL_AXLE
   print "Going forwards"
   no_rotations = distance / circumference
@@ -92,7 +92,7 @@ def forwardCorner(distance):
   while(BrickPi.Encoder[motor1] - encoder_1 < degrees
     and BrickPi.Encoder[motor2] - encoder_2 < degrees):
     BrickPiUpdateValues()
-    calibrateCorner(degrees, encoder_1, encoder_2)
+    calibrateCorner(degrees, encoder_1, encoder_2, factor)
     time.sleep(.001)
 
 def calibrate(degrees, encoder_1, encoder_2):
@@ -114,28 +114,32 @@ def calibrate(degrees, encoder_1, encoder_2):
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
 
-def calibrateCorner(degrees, encoder_1, encoder_2):
+def calibrateCorner(degrees, encoder_1, encoder_2, factor):
   global motorASpeed, motorBSpeed
   rotationsA = BrickPi.Encoder[motor1] - encoder_1
   rotationsB = BrickPi.Encoder[motor2] - encoder_2
   target_speed = DEFAULT_CORNER_SPEED
+  speed1 = BrickPi.MotorSpeed[motor1]
+  speed2 = BrickPi.MotorSpeed[motor2]
   #Coeficient (found by calibrating)
-  k = 25
+  k = factor
   delta = 30 - CURRENT_DISTANCE
   print "dist: ",CURRENT_DISTANCE
   if (delta==0):
      return
   change = float(1)/delta
   if 30 > CURRENT_DISTANCE:
+    print "close: ", abs(int(k*(1-change)))
     motorASpeed = target_speed + abs(int(k * (1 - change)))
     motorBSpeed = target_speed - abs(int(k * (1 - change)))
   elif 30 < CURRENT_DISTANCE:
-    motorASpeed = target_speed - abs(int(k * (1+change)))
-    motorBSpeed = target_speed + abs(int(k * (1+change)))
+    print "away: ", abs(int(k*(1+change)))
+    motorASpeed = target_speed - abs(int(k * (1 + change)))
+    motorBSpeed = target_speed + abs(int(k * (1 + change)))
   print "diff", delta
   print "A:", motorASpeed, "\tB:", motorBSpeed
-  BrickPi.MotorSpeed[motor1] = min(240,max(50,motorASpeed))
-  BrickPi.MotorSpeed[motor2] = min(240,max(50,motorBSpeed))
+  BrickPi.MotorSpeed[motor1] = min(target_speed+30,max(40,motorASpeed))
+  BrickPi.MotorSpeed[motor2] = min(target_speed+30,max(40,motorBSpeed))
 
 #Move backward
 def move_backwards(distance):
@@ -329,15 +333,17 @@ def require_distance():
     time.sleep(0.01)
   #wait(1)
 
-def run_corner():
+def run_corner(factor):
   global CURRENT_DISTANCE
+  BrickPi.MotorSpeed[motor1] = DEFAULT_CORNER_SPEED
+  BrickPi.MotorSpeed[motor1] = DEFAULT_CORNER_SPEED
   while True:    
     result = BrickPiUpdateValues()
     if not result:
       distance = get_distance()
       CURRENT_DISTANCE = distance
       print "distance: ", distance
-    forwardCorner(1)
+    forwardCorner(0.5, factor)
     time.sleep(0.01)
 
 def bump(hit_val):
@@ -369,5 +375,5 @@ def main():
   #move_backwards(10)
   #run()
   #require_distance()
-  run_corner()
-main()
+  run_corner(10)
+#main()
