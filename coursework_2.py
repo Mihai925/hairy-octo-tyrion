@@ -119,14 +119,15 @@ def move_backwards(distance):
   BrickPiUpdateValues()
   encoder_1 = BrickPi.Encoder[motor1]
   encoder_2 = BrickPi.Encoder[motor2]
-  motorASpeed = -DEFAULT_MOTOR_A_SPEED
-  motorBSpeed = -DEFAULT_MOTOR_B_SPEED
+  motorASpeed = -abs(motorASpeed)
+  motorBSpeed = -abs(motorBSpeed)
   circumference = 2 * math.pi * WHEEL_AXLE
   print "Going backwards"
   no_rotations = distance / circumference
   degrees  = no_rotations * 720
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
+  print "going in loop"
   while(encoder_1 - BrickPi.Encoder[motor1] < degrees
     and encoder_2 - BrickPi.Encoder[motor2] < degrees): 
     BrickPiUpdateValues()            	
@@ -156,7 +157,7 @@ def calibrateBack(degrees, encoder_1, encoder_2):
   global motorASpeed, motorBSpeed
   rotationsA = BrickPi.Encoder[motor1] - encoder_1
   rotationsB = BrickPi.Encoder[motor2] - encoder_2
-  target_speed = -DEFAULT_TARGET_SPEED
+  target_speed = -abs(motorASpeed)
   #Coeficient (found by calibrating)
   k = 1 
   if rotationsA < rotationsB:
@@ -267,26 +268,42 @@ def require_distance():
   BrickPiUpdateValues()
   actual_distance = get_distance()
   print "distance", actual_distance
-  
-  while actual_distance > DEFAULT_DISTANCE:
-    print "distance",  actual_distance
-    delta = float(1) / (actual_distance - DEFAULT_DISTANCE)
+  going_forwards = True  
+  while True:
+    print "distance", actual_distance
+    actual_distance = get_distance()
+    diff = actual_distance - DEFAULT_DISTANCE
+    if (abs(diff) <3):
+      wait(0.1)
+      continue
+    delta = float(1) / diff
     print 'delta:', delta
     if delta>=0:
+        if not going_forwards:
+           wait(0.1)
+           going_forwards = True
         k = 1 - delta
+        motorASpeed = max(50, int(k*250))
+        motorBSpeed = max(50, int(k*250))
+        forward(1)
     else:
         k = 1 + delta
-    motorASpeed = max(-50, int(k*250))
-    motorBSpeed = max(-50, int(k*250))
+        if going_forwards:
+           wait(0.1)
+           going_forwards = False
+        print "I think I'll crash"
+	motorASpeed = max(50, int(k*250))
+        motorBSpeed = max(50, int(k*250))
+        move_backwards(1)
     print 'k:', k
     #motorASpeed = 0
     #motorBSpeed = 0
     print 'motorASpeed:', motorASpeed
     print 'motorBSpeed:', motorBSpeed
-    forward(1)
-    actual_distance = get_distance()
+    #forward(1)
+    #actual_distance = get_distance()
     time.sleep(0.01)
-  wait(1)
+  #wait(1)
 
 def run_corner():
   global CURRENT_DISTANCE
@@ -337,6 +354,6 @@ def main():
   #BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
   #move_backwards(10)
   #run()
-  require_distance()
-  #run_corner()
+  #require_distance()
+  run_corner()
 main()
