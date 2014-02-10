@@ -54,7 +54,7 @@ DEFAULT_MOTOR_B_SPEED = 250
 DEFAULT_TARGET_SPEED = 202
 DEFAULT_DISTANCE = 45
 CURRENT_DISTANCE = 45
- 
+DEFAULT_CORNER_SPEED = 160 
 
 #Moving Forward
 def forward(distance):
@@ -118,9 +118,9 @@ def calibrateCorner(degrees, encoder_1, encoder_2):
   global motorASpeed, motorBSpeed
   rotationsA = BrickPi.Encoder[motor1] - encoder_1
   rotationsB = BrickPi.Encoder[motor2] - encoder_2
-  target_speed = DEFAULT_TARGET_SPEED
+  target_speed = DEFAULT_CORNER_SPEED
   #Coeficient (found by calibrating)
-  k = 10
+  k = 25
   delta = 30 - CURRENT_DISTANCE
   print "dist: ",CURRENT_DISTANCE
   if (delta==0):
@@ -130,8 +130,8 @@ def calibrateCorner(degrees, encoder_1, encoder_2):
     motorASpeed = target_speed + abs(int(k * (1 - change)))
     motorBSpeed = target_speed - abs(int(k * (1 - change)))
   elif 30 < CURRENT_DISTANCE:
-    motorASpeed = target_speed - abs(int(k * (1-change)))
-    motorBSpeed = target_speed + abs(int(k * (1-change)))
+    motorASpeed = target_speed - abs(int(k * (1+change)))
+    motorBSpeed = target_speed + abs(int(k * (1+change)))
   print "diff", delta
   print "A:", motorASpeed, "\tB:", motorBSpeed
   BrickPi.MotorSpeed[motor1] = min(240,max(50,motorASpeed))
@@ -337,7 +337,7 @@ def run_corner():
       distance = get_distance()
       CURRENT_DISTANCE = distance
       print "distance: ", distance
-    forwardCorner(2)
+    forwardCorner(1)
     time.sleep(0.01)
 
 def bump(hit_val):
