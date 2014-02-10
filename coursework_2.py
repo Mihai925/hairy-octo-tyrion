@@ -1,4 +1,4 @@
- #!/usr/bin/python
+#!/usr/bin/python
 # Jaikrishna
 # Initial Date: June 24, 2013
 # Last Updated: June 24, 2013
@@ -92,7 +92,7 @@ def calibrate(degrees, encoder_1, encoder_2):
     diff = rotationsA - rotationsB
     motorASpeed = target_speed - diff * k
     motorBSpeed = target_speed + diff * k
-  print 'calibrating:', motorASpeed, motorBSpeed
+  #print 'calibrating:', motorASpeed, motorBSpeed
   BrickPi.MotorSpeed[motor1] = motorASpeed
   BrickPi.MotorSpeed[motor2] = motorBSpeed
 
@@ -270,11 +270,15 @@ def require_distance():
   
   while actual_distance > DEFAULT_DISTANCE:
     print "distance",  actual_distance
-    delta = max(0, actual_distance - DEFAULT_DISTANCE)
-    print delta
-    k = delta / 25
-    motorASpeed = k * 250
-    motorBSpeed = k * 250
+    delta = float(1) / (actual_distance - DEFAULT_DISTANCE)
+    print 'delta:', delta
+    if delta>=0:
+        k = 1 - delta
+    else:
+        k = 1 + delta
+    motorASpeed = max(-50, int(k*250))
+    motorBSpeed = max(-50, int(k*250))
+    print 'k:', k
     #motorASpeed = 0
     #motorBSpeed = 0
     print 'motorASpeed:', motorASpeed
