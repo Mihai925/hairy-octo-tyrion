@@ -36,10 +36,10 @@ BrickPi.Encoder[motor1] = 0
 BrickPi.Encoder[motor2] = 0
 
 DISTANCE = PORT_3
-BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
+#BrickPi.SensorType[PORT_1] = TYPE_SENSOR_TOUCH
 #BrickPi.SensorType[PORT_2] = TYPE_SENSOR_TOUCH
 #BrickPi.SensorType[PORT_3] = TYPE_SENSOR_TOUCH
-BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
+#BrickPi.SensorType[PORT_4] = TYPE_SENSOR_TOUCH
 BrickPi.SensorType[DISTANCE] = TYPE_SENSOR_ULTRASONIC_CONT
 
 
@@ -263,6 +263,13 @@ def run():
       elif right==1:
         bump(3)
     time.sleep(0.001)
+
+def cont_distance():
+  i = 0
+  while(i<10):
+    print get_distance()
+    i+=1
+  
 
 def get_distance():
   global CURRENT_DISTANCE
