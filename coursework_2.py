@@ -382,6 +382,8 @@ def main():
   #move_backwards(10)
   #run()
   #require_distance()
-  run_corner(10)
-#main()
+  while True:
+    cont_distance()
+  #run_corner(10)
+main()
 
